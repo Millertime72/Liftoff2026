@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "et_translator"
+version = "1.0.0"
+
+readme = "README.md"
+requires-python = ">=3.7"
+license = {file = "LICENSE"}
+
+dependencies = [
+    "bs4",
+    "nltk",
+    "numpy",
+    "requests",
+    "scipy",
+    "sounddevice",
+    "SpeechRecognition"
+]
