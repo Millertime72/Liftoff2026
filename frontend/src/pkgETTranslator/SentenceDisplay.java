@@ -1,113 +1,132 @@
 package pkgETTranslator;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import java.awt.Dimension;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-
 import java.net.URL;
 import javax.imageio.ImageIO;
-import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 public class SentenceDisplay extends JPanel {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
+    private static Image pendingImage;
 
-	public SentenceDisplay() {
-		setLayout(null);
-		this.setPreferredSize(new Dimension(800, 600));
+    public SentenceDisplay() {
+        setLayout(null);
+        setPreferredSize(new Dimension(800, 600));
 
-		// layout settings
-		int nounWidth = 128;
-		int nounHeight = 128;
+        JButton btnReturnToRecord = new JButton("Return to Record");
+        btnReturnToRecord.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                TranslatorReader.mainFrame.getContentPane().removeAll();
+                TranslatorReader.mainFrame.getContentPane().add(new RecordSentence());
 
-		int startX = 16;
-		int startY = 60;
+                TranslatorReader.mainFrame.revalidate();
+                TranslatorReader.mainFrame.repaint();
+            }
+        });
+        btnReturnToRecord.setBounds(6, 6, 210, 29);
+        add(btnReturnToRecord);
 
-		int gapX = 20;
-		int gapY = 40;
+        int startX = 16;
+        int startY = 60;
+        int gapX = 20;
+        int gapY = 40;
+        int imagesPerRow = 5;
+        int baseSize = 128;
+        int addedNums = 0;
 
-		int imagesPerRow = 5;
-		int addedNums = 0;
+        boolean pendingPast = false;
+        boolean pendingFuture = false;
+        boolean applyPast = false;
+        boolean applyFuture = false;
+        boolean continueWord = true;
 
-		//debug
-		for (Word w : TranslatorReader.collectedChosenPhotos) {
-			System.out.println("WORD: " + w.getWord());
-		}
+        for (Word word : TranslatorReader.collectedChosenPhotos) {
+            String w = word.getWord().toLowerCase();
+            String imageURL = word.getChosenPhoto();
+            
+            if (imageURL == null || imageURL.isBlank() || imageURL.equals("nothing")) {
+                continue;
+            }
 
-		//render all words + their images
-		for (Word word : TranslatorReader.collectedChosenPhotos) {
+            imageURL = imageURL.trim();
 
-		    for (String imageURL : word.getAllPhotos()) {
+            //check if modifier
+            if (w.equals("past") || w.equals("future")) {
+                if (w.equals("past")) pendingPast = true;
+                if (w.equals("future")) pendingFuture = true;
 
-		        if (imageURL == null || imageURL.isBlank() || imageURL.equals("nothing")) {
-		            continue;
-		        }
+                try {
+                    URL url = new URL(imageURL);
+                    BufferedImage img = ImageIO.read(url);
+                    if (img != null) {
+                        // Synchronously scale the modifier
+                        pendingImage = new BufferedImage(baseSize / 2, baseSize / 2, BufferedImage.TYPE_INT_ARGB);
+                        Graphics2D g = ((BufferedImage) pendingImage).createGraphics();
+                        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                        g.drawImage(img, 0, 0, baseSize / 2, baseSize / 2, null);
+                        g.dispose();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                continue; 
+            }
 
-		        imageURL = imageURL.trim();
+            //draw regular words
+            int row = addedNums / imagesPerRow;
+            int col = addedNums % imagesPerRow;
+            int x = startX + (baseSize + gapX) * col;
+            int y = startY + (baseSize + gapY) * row;
 
-		        if (!imageURL.startsWith("http")) {
-		            continue;
-		        }
+            try {
+                URL url = new URL(imageURL);
+                BufferedImage img = ImageIO.read(url);
+                if (img != null) {
+                    //sync image
+                    BufferedImage mainScaled = new BufferedImage(baseSize, baseSize, BufferedImage.TYPE_INT_ARGB);
+                    Graphics2D g = mainScaled.createGraphics();
+                    g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                    g.drawImage(img, 0, 0, baseSize, baseSize, null);
+                    g.dispose();
 
-		        int row = addedNums / imagesPerRow;
-		        int col = addedNums % imagesPerRow;
+                    //create main image label
+                    JLabel imageLabel = new JLabel(new ImageIcon(mainScaled));
+                    imageLabel.setBounds(x, y, baseSize, baseSize);
+                    add(imageLabel);
 
-		        int x = startX + (nounWidth + gapX) * col;
-		        int y = startY + (nounHeight + gapY) * row;
+                    //apply pending modifiers
+                    if ((pendingPast || pendingFuture) && pendingImage != null) {
+                        JLabel timeLabel = new JLabel(new ImageIcon(pendingImage));
+                        //position on top left of image
+                        timeLabel.setBounds(x - 5, y - 5, baseSize / 2, baseSize / 2);
+                        add(timeLabel);
+                        //force op top
+                        setComponentZOrder(timeLabel, 0);
 
-		        try {
-		            URL url = new URL(imageURL);
-		            BufferedImage img = ImageIO.read(url);
+                        //reset for next word
+                        pendingPast = false;
+                        pendingFuture = false;
+                        pendingImage = null;
+                    }
 
-		            if (img == null) continue;
+                    //word text label
+                    JLabel textLabel = new JLabel(word.getWord());
+                    textLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                    textLabel.setBounds(x, y + baseSize + 5, baseSize, 20);
+                    add(textLabel);
 
-		            Image scaled = img.getScaledInstance(
-		                nounWidth,
-		                nounHeight,
-		                Image.SCALE_SMOOTH
-		            );
+                    addedNums++;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
-		            //image
-		            JLabel imageLabel = new JLabel(new ImageIcon(scaled));
-		            imageLabel.setBounds(x, y, nounWidth, nounHeight);
-		            add(imageLabel);
-
-		            //word label under image
-		            JLabel textLabel = new JLabel(word.getWord());
-		            textLabel.setBounds(x, y + nounHeight + 5, nounWidth, 20);
-		            add(textLabel);
-
-		            addedNums++;
-
-		        } catch (Exception e) {
-		            System.out.println("Failed to load: " + imageURL);
-		            e.printStackTrace();
-		        }
-		    }
-		}
-		//dynamic panel height
-		int totalRows = (int) Math.ceil((double) addedNums / imagesPerRow);
-		int neededHeight = startY + (totalRows * (nounHeight + gapY)) + 100;
-
-		this.setPreferredSize(new Dimension(800, neededHeight));
-		
-		JButton btnReturnToRecord = new JButton("Return to Record");
-		btnReturnToRecord.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-	            TranslatorReader.mainFrame.getContentPane().removeAll();
-	            TranslatorReader. mainFrame.getContentPane().add(new RecordSentence());
-
-	            TranslatorReader. mainFrame.revalidate();
-	            TranslatorReader.mainFrame.repaint();
-	            return;
-			}
-		});
-		btnReturnToRecord.setBounds(6, 0, 273, 15);
-		add(btnReturnToRecord);
-	}
+        // Refresh the UI to show the new components
+        revalidate();
+        repaint();
+    }
 }

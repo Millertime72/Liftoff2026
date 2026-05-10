@@ -10,14 +10,12 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 public class ImageSelection extends JPanel {
     private static int currWordIndex = 0;
     private static Word currWord;
-
     private static int currImgIndex = 0;
     private static int maxImgIndex = 0;
 
@@ -55,7 +53,6 @@ public class ImageSelection extends JPanel {
         JButton btnSelect = new JButton("Select");
         btnSelect.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
                 int userConfirm = JOptionPane.showConfirmDialog(
                         null,
                         "Are you sure you want to choose this image?",
@@ -69,10 +66,8 @@ public class ImageSelection extends JPanel {
                 	}
                     String selectedImage = currWord.getAllPhotos().get(currImgIndex);
 
-                    Word saved = new Word(currWord.getWord());
-                    saved.append(selectedImage);
-
-                    TranslatorReader.collectedChosenPhotos.add(saved);
+                    currWord.setChosenPhoto(selectedImage);    
+                    TranslatorReader.collectedChosenPhotos.add(currWord);
 
                     nextPhoto(lblDisplayImage, lblCurrSelecting, lblCurrImgNum);
                 }
@@ -87,7 +82,6 @@ public class ImageSelection extends JPanel {
             public void actionPerformed(ActionEvent e) {
 
                 if (currWord.getAllPhotos().isEmpty()) return;
-
                 currImgIndex--;
 
                 if (currImgIndex < 0) {
@@ -105,7 +99,6 @@ public class ImageSelection extends JPanel {
             public void actionPerformed(ActionEvent e) {
 
                 if (currWord.getAllPhotos().isEmpty()) return;
-
                 currImgIndex++;
 
                 if (currImgIndex > maxImgIndex) {
