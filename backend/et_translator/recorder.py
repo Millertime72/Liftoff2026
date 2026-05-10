@@ -2,7 +2,6 @@ from typing import Optional
 
 import sounddevice as sd
 import speech_recognition as sr
-from scipy.io.wavfile import write as write_as_wav
 
 
 SAMPLE_RATE = 16000

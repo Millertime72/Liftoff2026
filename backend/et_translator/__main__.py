@@ -10,8 +10,8 @@ DELIMITER = "~"
 def speech_to_text(args: Namespace) -> str:
     r = Recorder()
 
-    print("Speak now!")
-    
+    print("Speak now!", flush=True)
+
     audio_data = r.record(args.duration)
     text = r.speech_to_text(audio_data)
 
@@ -43,4 +43,4 @@ text_parser.set_defaults(func=text_to_images)
 args = parser.parse_args()
 output = args.func(args)
 
-print(output)
+print(output, flush=True)

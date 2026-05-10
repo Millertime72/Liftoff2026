@@ -15,7 +15,6 @@ dependencies = [
     "nltk",
     "numpy",
     "requests",
-    "scipy",
     "sounddevice",
     "SpeechRecognition"
 ]

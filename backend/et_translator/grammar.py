@@ -47,5 +47,7 @@ class Grammar:
                     keywords.append(self.Subject.ME)
                 elif word == "you":
                     keywords.append(self.Subject.YOU)
+            elif word == "'m":
+                pass
 
         return keywords

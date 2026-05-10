@@ -40,6 +40,8 @@ class ImageScraper:
                 # Webscrape & store relevent data
                 for src in [item["src"] for item in soup.find_all("img")]:
                     if "photo" in src:
+                        # Hacky-ass fix
+                        src = src.replace("w=3000", "w=512")
                         # Add image link to list
                         images.append(src)
                         
