@@ -5,8 +5,6 @@ from et_translator.image_scraper import ImageScraper
 from et_translator.recorder import Recorder
 
 
-DELIMITER = "~"
-
 def speech_to_text(args: Namespace) -> str:
     r = Recorder()
 
@@ -22,11 +20,9 @@ def text_to_images(args: Namespace) -> str:
     s = ImageScraper(args.n_images)
 
     keywords = g.extract_keywords(args.text)
-
     message = s.keywords_to_message(keywords)
-    data_string = "\n".join([DELIMITER.join([term["word"]] + term["images"]) for term in message])
 
-    return data_string
+    return message
 
 parser = ArgumentParser(prog="et_translator")
 subparsers = parser.add_subparsers()

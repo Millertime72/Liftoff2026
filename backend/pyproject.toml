@@ -12,8 +12,10 @@ license = {file = "LICENSE"}
 
 dependencies = [
     "bs4",
+    "contractions",
     "nltk",
     "numpy",
+    "pyusb",
     "requests",
     "sounddevice",
     "SpeechRecognition"

@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import requests
 import os
@@ -13,6 +13,7 @@ DEFAULT_IMAGES = {
     Grammar.Subject.ME: "https://static.vecteezy.com/system/resources/previews/049/614/310/non_2x/human-body-anatomy-transparent-background-free-png.png",
     Grammar.Subject.YOU: "https://dejpknyizje2n.cloudfront.net/processing/raster/8e6740516ca74065b7304c6a501b358b.png"
 }
+DELIMITER = "~"
 
 class ImageScraper:
     def __init__(self, n_images: int):
@@ -24,14 +25,17 @@ class ImageScraper:
         
         return r.text
     
-    def keywords_to_message(self, keywords: List[str | Grammar.Info]) -> List[Dict[str, List[str]]]:
-        message = []
+    def keywords_to_message(self, keywords: List[Tuple[str | Grammar.Info, bool]]) -> str:
+        message = ""
         keep_searching = True
 
-        for keyword in keywords:
+        for keyword, corner_term in keywords:
             images = []
+            
+            if keyword in Grammar.QUESTIONS:
+                images.append("https://png.pngtree.com/recommend-works/png-clipart/20241224/ourmid/pngtree-red-question-mark-symbol-png-image_14540396.png")
 
-            if not isinstance(keyword, Grammar.Info):
+            elif not isinstance(keyword, Grammar.Info):
                 search_string = "https://unsplash.com/s/photos/" + keyword.lower()
             
                 html_data = self._get_data(search_string) 
@@ -56,9 +60,6 @@ class ImageScraper:
                     images.append(image)
             
             if len(images) > 0:
-                message.append({
-                    "word": str(keyword),
-                    "images": images
-                })
+                message += DELIMITER.join([str(int(corner_term)), str(keyword)] + images) + "\n"
         
         return message

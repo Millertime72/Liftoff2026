@@ -1,27 +1,34 @@
 package pkgETTranslator;
 
 import javax.swing.JPanel;
-import javax.swing.JOptionPane;
 import java.awt.Dimension;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import javax.swing.JEditorPane;
 import javax.swing.JTextField;
-import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 import javax.swing.JOptionPane; 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.Timer;
+import javax.swing.SwingUtilities;
+import java.io.IOException;
+
 
 public class RecordSentence extends JPanel {
 	private static JFrame mainFrame;
 	private int recordTime;
 	private static final long serialVersionUID = 1L;
 	private JTextField txtSpeechDuration;
-	private String sentence;
-	
+	private JEditorPane displaySentence;
+	private ImageIcon DefaultAlien = new ImageIcon("Images/DefaultAlien.png");
+	private ImageIcon HappyAlien = new ImageIcon("Images/HappyAlien.png");
+	private Timer happinessTimer;
+
 	/**
 	 * Create the panel.
 	 */
@@ -32,14 +39,86 @@ public class RecordSentence extends JPanel {
 		
 		String currentInput = "None";
 		
-		JButton btnContinue = new JButton("Continue");
+		//background
+        ImageIcon bgIcon = new ImageIcon(TranslatorReader.backgroundIMG);
+        JLabel background = new JLabel(bgIcon);
+        background.setBounds(0, 0, 800, 600);
+        
+        //alien guy
+        JButton alienGuy = new JButton(DefaultAlien);
+        alienGuy.setContentAreaFilled(false);
+        alienGuy.setBorderPainted(false);
+        alienGuy.setFocusPainted(false);
+        alienGuy.setBounds(477, 249, 320, 320);
+        add(alienGuy);
+        
+        //set up happiness timer
+        happinessTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Change back to the default face
+                alienGuy.setIcon(DefaultAlien);
+                // Ensure the timer stops after running once
+                happinessTimer.stop(); 
+            }
+        });
+
+        //detect alien guy press
+        alienGuy.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                //only allow petting if the button is enabled
+                if (alienGuy.isEnabled()) {
+                    //stop if already happy
+                    if (happinessTimer.isRunning()) {
+                        happinessTimer.stop();
+                    }
+
+                    //change to happy
+                    alienGuy.setIcon(HappyAlien);
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                //only run  if happy
+                if (alienGuy.isEnabled() && alienGuy.getIcon().equals(HappyAlien)) {
+                    //start happiness timer 
+                    happinessTimer.start();
+                }
+            }
+        });
+		
+        JButton btnContinue = new JButton("<html><span style='color:black;'>Continue</span></html>", TranslatorReader.defaultImageIcon);
+		btnContinue.setVerticalTextPosition(SwingConstants.CENTER);
+		btnContinue.setHorizontalTextPosition(SwingConstants.CENTER);
+		btnContinue.setFocusPainted(false);
+		btnContinue.setContentAreaFilled(false);
+		btnContinue.setBorderPainted(false);
 		btnContinue.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//read sentence file
-				TranslatorReader.readSentenceFile(sentence); 
-				
-				//continue to next panel
-				TranslatorReader.switchToImgSelect();
+				// disable button while loading
+		        btnContinue.setEnabled(false);
+
+		        // loading text
+		        btnContinue.setText("Loading...");
+
+		        // optional repaint immediately
+		        btnContinue.repaint();
+
+		        SwingUtilities.invokeLater(new Runnable() {
+		            public void run() {
+						//read sentence file
+						TranslatorReader.readSentenceFile(displaySentence.getText());
+						
+						//restore button if needed
+		                btnContinue.setText("Continue");
+		                btnContinue.setEnabled(true);
+		                
+						//continue to next panel
+						TranslatorReader.switchToImgSelect();
+		            }
+		        });
 			}
 		});
 		btnContinue.setBounds(6, 307, 117, 29);
@@ -47,13 +126,18 @@ public class RecordSentence extends JPanel {
 		//disable continue on launch
 		btnContinue.setEnabled(false);
 		
-		JButton btnRecord = new JButton("Record");
+		JButton btnRecord = new JButton("<html><span style='color:black;'>Record</span></html>", TranslatorReader.defaultImageIcon);
+		btnRecord.setVerticalTextPosition(SwingConstants.CENTER);
+		btnRecord.setHorizontalTextPosition(SwingConstants.CENTER);
+		btnRecord.setFocusPainted(false);
+		btnRecord.setContentAreaFilled(false);
+		btnRecord.setBorderPainted(false);
 		btnRecord.setBounds(6, 154, 117, 29);
 		add(btnRecord);
 		//start disabled
 		btnRecord.setEnabled(false);
 		
-		JEditorPane displaySentence = new JEditorPane();
+		displaySentence = new JEditorPane();
 		displaySentence.setBounds(6, 195, 698, 93);
 		add(displaySentence);
 		displaySentence.setEnabled(false);
@@ -63,8 +147,12 @@ public class RecordSentence extends JPanel {
 		add(txtSpeechDuration);
 		txtSpeechDuration.setColumns(10);
 		
-		JButton btnInputSpeechDuration = new JButton("Input Speech Duration");
-		btnInputSpeechDuration.addActionListener(new ActionListener() {
+		JButton btnInputSpeechDuration = new JButton("<html><span style='color:black;'>Input Speech Duration</span></html>", TranslatorReader.defaultImageIcon);
+		btnInputSpeechDuration.setVerticalTextPosition(SwingConstants.CENTER);
+		btnInputSpeechDuration.setHorizontalTextPosition(SwingConstants.CENTER);
+		btnInputSpeechDuration.setFocusPainted(false);
+		btnInputSpeechDuration.setContentAreaFilled(false);
+		btnInputSpeechDuration.setBorderPainted(false);		btnInputSpeechDuration.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//retrieve input
 				String inputString = txtSpeechDuration.getText();
@@ -87,8 +175,7 @@ public class RecordSentence extends JPanel {
 		btnRecord.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					sentence = MiddleMan.speechToText(recordTime);
-					displaySentence.setText(sentence);
+					displaySentence.setText(MiddleMan.speechToText(recordTime));
 				} catch (IOException err) {
 					JOptionPane.showMessageDialog(null, err);
 					System.exit(1);
@@ -99,6 +186,10 @@ public class RecordSentence extends JPanel {
 				displaySentence.setEnabled(true);
 			}
 		});
+		
+	    //send bg to very back
+        add(background);
+        setComponentZOrder(background, getComponentCount() - 1);
 	}
 	
 	//check if input is int

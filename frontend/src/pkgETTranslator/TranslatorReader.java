@@ -2,23 +2,37 @@
 //Reads through the chosen images textfile
 package pkgETTranslator;
 //imports
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.BufferedReader;
+import javax.swing.JOptionPane;
 import java.util.ArrayList;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+import java.awt.Font;
+import javax.swing.UIManager;
+import javax.swing.ImageIcon;
+
 
 public class TranslatorReader {
 	//arraylist of read data
 	private static ArrayList<String> rawData = new ArrayList<>();
 	public static ArrayList<Word> collectedPotentialPhotos = new ArrayList<>();
 	public static ArrayList<Word> collectedChosenPhotos = new ArrayList<>();
-	public static String sentenceFile = "ChosenImages.txt";
+	public static final String sentenceFile = "ChosenImages.txt";
 	public static JFrame mainFrame;
+	public static final String backgroundIMG = "Images/GalaxyBackground.PNG";
+	public static final ImageIcon defaultImageIcon = new ImageIcon("Images/DefaultButton.PNG");
 	
 	//main
 	public static void main(String[] args) {		
+		//set up font
+		Font goofyFont = new Font("Comic Sans MS", Font.BOLD, 12);
+		//set default font on used components
+		UIManager.put("Label.font", goofyFont);
+		UIManager.put("Button.font", goofyFont);
+		UIManager.put("TextField.font", goofyFont);
+		UIManager.put("EditorPane.font", goofyFont);
+		UIManager.put("TextArea.font", goofyFont);
+		UIManager.put("OptionPane.font", goofyFont);
+
 		//launch displays
 		TranslatorFrame translatorFrame = new TranslatorFrame();
 		mainFrame = translatorFrame;
@@ -31,30 +45,43 @@ public class TranslatorReader {
 	    collectedChosenPhotos.clear();
 	    
 	    try {
-	    	rawData = MiddleMan.textToImages(sentence, 3);
+	    	rawData = MiddleMan.textToImages(sentence, 5);
 	    } catch (IOException err) {
-	    	JOptionPane.showMessageDialog(null, err);
+	    		JOptionPane.showMessageDialog(null, err);
 			System.exit(1);
 	    }
 
 	    for (String line : rawData) {
-	        if (line == null || line.trim().isEmpty()) continue;
+	    	if (line == null || line.trim().isEmpty()) continue;
 
-	        String[] splitLine = line.split("~"); // IMPORTANT: use ~
-
-	        Word w = new Word(splitLine[0].trim());
-
-	        for (int i = 1; i < splitLine.length; i++) {
-	            String url = splitLine[i].trim();
-	            if (!url.isEmpty()) {
-	                w.append(url);
-	            }
+	        String[] parts = line.split("~");
+	        
+	        // Ensure we have at least Type and Word Name
+	        if (parts.length < 2) {
+	            System.err.println("Skipping malformed line: " + line);
+	            continue;
 	        }
 
-	        collectedPotentialPhotos.add(w);
-	    }
+	        try {
+	            int wordType = Integer.parseInt(parts[0].trim());
+	            
+	            String wordName = parts[1].trim();
+	            
+	            Word w = new Word(wordName, wordType);
+	            
+	            // Loop through remaining parts for URLs
+	            for (int i = 2; i < parts.length; i++) {
+	                String url = parts[i].trim();
+	                if (!url.isEmpty()) {
+	                    w.append(url);
+	                }
+	            }
 
-	    System.out.println(collectedPotentialPhotos);
+	            collectedPotentialPhotos.add(w);
+	        } catch (NumberFormatException e) {
+	            System.err.println("Invalid WordType format in line: " + line);
+	        }
+	    }
 	}
 	
 	public static void switchToImgSelect() {
