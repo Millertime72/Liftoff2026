@@ -23,5 +23,5 @@ Maud built the frontend using Java, and Finn built the backend using Python. We 
 
 ## What's next for E.T. Translator
 - Accounting for grammatical edge-cases (multiple adjectives in a row, homonyms, etc).
-- Upgrading image source to better represent the _ meanings _ of words.
+- Upgrading image source to better represent the meanings of words.
 - Continuing to improve the GUI's data entry and display.
