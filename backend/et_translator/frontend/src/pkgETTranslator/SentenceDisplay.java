@@ -67,7 +67,7 @@ public class SentenceDisplay extends JPanel {
                    g.drawImage(img, 0, 0, baseSize / 2, baseSize / 2, null);
                    g.dispose();
                }
-               //skip drawing badges as main
+               //skip drawing as main
                continue;
            }
            //draw regulars

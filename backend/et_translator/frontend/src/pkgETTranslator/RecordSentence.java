@@ -37,6 +37,8 @@ public class RecordSentence extends JPanel {
 		mainFrame = TranslatorFrame.frame;
 		this.setPreferredSize(new Dimension(800, 600)); 
 		
+		String currentInput = "None";
+		
 		//background
         ImageIcon bgIcon = new ImageIcon(TranslatorReader.backgroundIMG);
         JLabel background = new JLabel(bgIcon);
@@ -95,14 +97,15 @@ public class RecordSentence extends JPanel {
 		btnContinue.setBorderPainted(false);
 		btnContinue.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//disable button while loading
+				// disable button while loading
 		        btnContinue.setEnabled(false);
 
-		        //loading text
+		        // loading text
 		        btnContinue.setText("Loading...");
+
+		        // optional repaint immediately
 		        btnContinue.repaint();
-		        
-		        //button functionality from background thread
+
 		        SwingUtilities.invokeLater(new Runnable() {
 		            public void run() {
 						//read sentence file

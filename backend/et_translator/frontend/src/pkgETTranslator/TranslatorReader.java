@@ -53,24 +53,23 @@ public class TranslatorReader {
 
 	    for (String line : rawData) {
 	    	if (line == null || line.trim().isEmpty()) continue;
-	    	//split data
+
 	        String[] parts = line.split("~");
 	        
-	        //ensure there is a name & type
+	        // Ensure we have at least Type and Word Name
 	        if (parts.length < 2) {
 	            System.err.println("Skipping malformed line: " + line);
 	            continue;
 	        }
 
 	        try {
-	        	//collect information
 	            int wordType = Integer.parseInt(parts[0].trim());
 	            
-	        	//store word name & type
 	            String wordName = parts[1].trim();
+	            
 	            Word w = new Word(wordName, wordType);
 	            
-	            //loop through remaining parts for URLs
+	            // Loop through remaining parts for URLs
 	            for (int i = 2; i < parts.length; i++) {
 	                String url = parts[i].trim();
 	                if (!url.isEmpty()) {

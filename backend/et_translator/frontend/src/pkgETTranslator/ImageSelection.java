@@ -42,7 +42,7 @@ public class ImageSelection extends JPanel {
         JLabel background = new JLabel(bgIcon);
         background.setBounds(0, 0, 800, 600);
 
-        //prevent empty selection
+        //safety check (prevents crash if empty)
         if (TranslatorReader.collectedPotentialPhotos.isEmpty()) {
             System.out.println("No words loaded.");
             if (currWord.getAllPhotos().isEmpty()) {
@@ -52,12 +52,11 @@ public class ImageSelection extends JPanel {
             return;
         }
         
-        //set current data
         currWord = TranslatorReader.collectedPotentialPhotos.get(currWordIndex);
+
         maxImgIndex = currWord.getAllPhotos().size() - 1;
         if (maxImgIndex < 0) maxImgIndex = 0;
-        
-        //define display labels
+
         lblDisplayImage = new JLabel();
         lblDisplayImage.setBounds(6, 44, 512, 512);
         add(lblDisplayImage);
@@ -73,8 +72,7 @@ public class ImageSelection extends JPanel {
         lblCurrSelecting = new JLabel("Currently Selecting: " + currWord.getWord());
         lblCurrSelecting.setBounds(530, 312, 253, 16);
         add(lblCurrSelecting);
-        
-        //buttons
+
         ImageIcon shootingStar = new ImageIcon("Images/ShootingStar.PNG");
         JButton btnSelect = new JButton( "<html><span style='color:yellow;'>Select</span></html>", shootingStar);
         btnSelect.setHorizontalTextPosition(SwingConstants.CENTER);
@@ -255,6 +253,7 @@ public class ImageSelection extends JPanel {
         //send bg to very back
         add(background);
         setComponentZOrder(background, getComponentCount() - 1);
+       
         updateImage();
     }
 
